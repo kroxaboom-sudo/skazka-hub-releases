@@ -1,67 +1,59 @@
-# Skazka Hub — переход 0.6.23-preview → 0.7.0-preview / transition 0.6.23-preview → 0.7.0-preview
+# Skazka Hub 0.7.1-preview
 
 ## RU
 
-Этот релиз выполняет безопасный переход Android package ID с `me.zaza.reader` на `com.kroxaboom.skazkahub` без удаления старого приложения и без потери локальных данных.
+### Навигация и структура
+- Главная навигация приведена к постоянной схеме: **Библиотека → Новое → Каталог → Загрузки → Ещё**.
+- `Ещё` всегда открывает глобальный раздел; действия текущей главы и сайта вынесены в отдельное контекстное меню `⋮`.
+- Выбранная вкладка теперь определяется стабильным внутренним ID, а не видимым русским текстом, поэтому RU/EN больше не влияет на навигацию.
+- Фоновая синхронизация больше не блокирует переходы между разделами.
 
-### Для существующих установок
+### Библиотека, загрузки и планшеты
+- Верх Библиотеки на телефоне упрощён: поиск, фильтры и быстрые фильтры остаются на виду, категория/сортировка/вид собраны в компактное меню.
+- На планшете Библиотека получила master-detail: список/сетка слева, выбранное произведение и быстрые действия справа.
+- Загрузки получили контекстную Пауза/Продолжить, Retry показывается только при ошибках, редкие действия находятся в `⋮`.
+- На планшете Загрузки работают как очередь слева и главы выбранного произведения справа.
+- Каталог на планшете показывает результаты слева и preview выбранного произведения справа.
+- Settings на планшете используют отдельную левую навигацию и правую панель параметров.
 
-1. Установите **Skazka Hub 0.6.23-preview** поверх 0.6.22-preview. Не удаляйте старое приложение.
-2. В переходной версии запустите переход на новый package ID. Она скачает и проверит **Skazka Hub 0.7.0-preview** с package `com.kroxaboom.skazkahub`.
-3. Новый Skazka Hub перенесёт библиотеку, историю, прогресс, настройки, IMAGE/TEXT/MIXED-контент, сохранённые обложки и защищённые сессии.
-4. Старая установка `me.zaza.reader` останется на устройстве. Не удаляйте её до быстрой проверки библиотеки, прогресса и скачанного контента в 0.7.0-preview.
-5. Разрешения Android на ранее выбранные внешние папки могут потребовать повторного предоставления. Сам перенесённый внутренний контент при этом не удаляется.
+### Настройки
+- Настройки сгруппированы в четыре понятных блока: **Чтение**, **Офлайн и файлы**, **Аккаунт и данные**, **Приложение**.
+- `Аккаунт Grouple` и `Синхронизация` объединены в один раздел **Аккаунт и синхронизация**.
+- `Источники` переименованы в **Источники и зеркала**, `Сервис` — в **Поддержка и диагностика**.
+- Экран package migration больше не занимает постоянное место в настройках после успешного переноса.
 
-### Для новых установок
-
-Новые пользователи могут установить **Skazka Hub 0.7.0-preview** и выбрать новую установку без legacy-данных.
-
-### Совместимость релиза
-
-Переходный GitHub Release публикуется под tag **v0.6.23-preview** и временно остаётся **Latest**, чтобы существующие 0.6.22-клиенты получили совместимый `update.json`.
-
-В одном release должны находиться оба APK и три раздельных manifest-файла:
-
-- `update.json` → legacy `me.zaza.reader` / 0.6.23-preview;
-- `update-canonical.json` → canonical `com.kroxaboom.skazkahub` / 0.7.0-preview;
-- `package-migration.json` → проверенный canonical APK, который устанавливает переходная версия.
-
-Не заменяйте этот переходный Latest на canonical-only release, пока legacy migration window не будет закрыт отдельным решением.
-
-Экраны перехода, диалоги и пользовательские ошибки входят в общий словарь локализации и проверены для RU/EN.
-
-Минимальная версия Android: **13 / API 33**. Оба APK подписаны тем же доверенным сертификатом проекта.
-
----
+### Окончательный package transition
+- Основной Android package: **`com.kroxaboom.skazkahub`**.
+- Версия: **0.7.1-preview**, `versionCode 30`, Android 13+.
+- Новый canonical release становится Latest.
+- Для старых установок `releases/latest/download/update.json` остаётся совместимым bridge-feed и продолжает указывать на уже опубликованный `me.zaza.reader` 0.6.23-preview.
+- `update-canonical.json` и `package-migration.json` указывают на canonical 0.7.1-preview. Поэтому пользователь 0.6.22/0.6.23 всё ещё может безопасно пройти миграцию даже после переключения Latest на canonical release.
 
 ## EN
 
-This release performs the safe Android package-ID transition from `me.zaza.reader` to `com.kroxaboom.skazkahub` without uninstalling the old app and without discarding local data.
+### Navigation and structure
+- Primary navigation is now stable: **Library → New → Catalog → Downloads → More**.
+- `More` always opens global navigation; current chapter/site actions live in a separate contextual `⋮` menu.
+- Selected navigation uses stable internal IDs rather than visible Russian labels, so RU/EN can no longer break tab state.
+- Background synchronization no longer blocks navigation.
 
-### Existing installations
+### Library, downloads, and tablets
+- The phone Library header is simplified: search, filters, and quick filters stay visible while category/sort/view move into one compact menu.
+- Tablet Library now uses master-detail: collection on the left, selected title and quick actions on the right.
+- Downloads use one contextual Pause/Resume action; Retry appears only when errors exist; rare actions move to `⋮`.
+- Tablet Downloads use queue-on-the-left and selected-title chapters/actions on the right.
+- Tablet Catalog keeps results on the left and a selected-title preview on the right.
+- Tablet Settings use a dedicated left navigation column and right-side settings panel.
 
-1. Install **Skazka Hub 0.6.23-preview** over 0.6.22-preview. Do not uninstall the old app.
-2. Start the package transition from the transition build. It downloads and verifies **Skazka Hub 0.7.0-preview** with package `com.kroxaboom.skazkahub`.
-3. The new Skazka Hub imports the library, history, reading progress, settings, IMAGE/TEXT/MIXED content, saved artwork, and protected sessions.
-4. The old `me.zaza.reader` installation remains on the device. Keep it until the library, progress, and downloaded content have been checked in 0.7.0-preview.
-5. Android permissions for previously selected external folders may need to be granted again. Migrated internal content is not removed by this requirement.
+### Settings
+- Settings are grouped into **Reading**, **Offline and files**, **Account and data**, and **App**.
+- Grouple account and synchronization are combined into **Account and sync**.
+- Sources are now **Sources and mirrors**; Service is now **Support and diagnostics**.
+- Package migration no longer occupies a permanent settings row after migration completes.
 
-### New installations
-
-New users may install **Skazka Hub 0.7.0-preview** and choose a fresh installation without legacy data.
-
-### Release compatibility
-
-The transition GitHub Release uses tag **v0.6.23-preview** and temporarily remains **Latest** so existing 0.6.22 clients receive a compatible `update.json`.
-
-The same release must contain both APKs and three separate manifests:
-
-- `update.json` → legacy `me.zaza.reader` / 0.6.23-preview;
-- `update-canonical.json` → canonical `com.kroxaboom.skazkahub` / 0.7.0-preview;
-- `package-migration.json` → the verified canonical APK installed by the transition build.
-
-Do not replace this transition Latest with a canonical-only release until the legacy migration window is explicitly closed.
-
-Migration screens, dialogs, and user-facing errors use the shared localization catalog and are verified for RU/EN.
-
-Minimum Android version: **13 / API 33**. Both APKs are signed with the same trusted project certificate.
+### Final package transition
+- Canonical Android package: **`com.kroxaboom.skazkahub`**.
+- Version: **0.7.1-preview**, `versionCode 30`, Android 13+.
+- The canonical release becomes Latest.
+- `releases/latest/download/update.json` remains a compatibility bridge for old installs and still points to the immutable `me.zaza.reader` 0.6.23-preview APK.
+- `update-canonical.json` and `package-migration.json` point to canonical 0.7.1-preview, so 0.6.22/0.6.23 users can still migrate safely after Latest moves to the canonical line.

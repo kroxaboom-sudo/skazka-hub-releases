@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the public Skazka Hub release page and transition metadata."""
+"""Validate the canonical Skazka Hub release page and legacy migration bridge."""
 import hashlib
 import json
 import re
@@ -11,10 +11,9 @@ def digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def local_links(root: Path, readme: str) -> set[str]:
+def check_links(root: Path, readme: str) -> None:
     refs = re.findall(r'(?:src|href)="([^"]+)"', readme)
     refs += re.findall(r'\]\(([^)]+)\)', readme)
-    images = set()
     for ref in refs:
         url = urlsplit(ref)
         if url.scheme or ref.startswith('#'):
@@ -23,66 +22,57 @@ def local_links(root: Path, readme: str) -> set[str]:
         target = (root / path).resolve()
         assert target.is_relative_to(root.resolve()), 'Link escapes repository'
         assert target.is_file(), f'Broken local link: {path}'
-        if path.endswith('.png'):
-            images.add(path)
-    return images
-
-
-def check_transition(root: Path, review: dict, readme: str, notes: str) -> None:
-    legacy = json.loads((root / 'update.json').read_text())
-    android9 = json.loads((root / 'update-android9.json').read_text())
-    canonical = json.loads((root / 'update-canonical.json').read_text())
-    migration = json.loads((root / 'package-migration.json').read_text())
-
-    assert review['version'] == legacy['versionName'] == '0.6.23-preview'
-    assert review['canonical_version'] == canonical['versionName'] == '0.7.0-preview'
-    assert legacy['packageName'] == 'me.zaza.reader'
-    assert canonical['packageName'] == 'com.kroxaboom.skazkahub'
-    assert migration['packageName'] == canonical['packageName']
-    assert migration['versionCode'] == canonical['versionCode']
-    assert migration['versionName'] == canonical['versionName']
-    assert migration['sha256'] == canonical['sha256']
-    assert migration['size'] == canonical['size']
-    assert migration['apkUrl'] == canonical['apkUrl']
-    assert android9 == legacy, 'Legacy compatibility feed drifted from update.json'
-
-    for manifest in (legacy, canonical):
-        apk = root / Path(manifest['apkUrl']).name
-        assert apk.is_file(), f'Missing APK: {apk.name}'
-        assert apk.stat().st_size == manifest['size'], f'{apk.name}: size mismatch'
-        assert digest(apk) == manifest['sha256'], f'{apk.name}: SHA-256 mismatch'
-        assert manifest['minSdk'] == 33
-
-    assert '0.6.23-preview → 0.7.0-preview' in readme
-    assert 'me.zaza.reader' in readme and 'com.kroxaboom.skazkahub' in readme
-    assert 'update-canonical.json' in readme and 'package-migration.json' in readme
-    assert '0.6.23-preview' in notes and '0.7.0-preview' in notes
-    assert 'RU' in notes and 'EN' in notes
-    assert not local_links(root, readme), 'Transition page should not claim stale release screenshots'
 
 
 def check(root: Path) -> None:
     review = json.loads((root / 'release-page.json').read_text())
+    legacy = json.loads((root / 'update.json').read_text())
+    android9 = json.loads((root / 'update-android9.json').read_text())
+    canonical = json.loads((root / 'update-canonical.json').read_text())
+    migration = json.loads((root / 'package-migration.json').read_text())
     readme = (root / 'README.md').read_text()
     notes = (root / 'RELEASE_NOTES.md').read_text()
 
+    assert review['mode'] == 'canonical-with-legacy-bridge'
+    assert review['canonical_version'] == '0.7.1-preview'
+    assert review['legacy_bridge_version'] == '0.6.23-preview'
     gate_commit = review.get('device_gate_commit', '')
-    assert re.fullmatch(r'[0-9a-f]{40}', gate_commit), 'HOSTKEY device-gate commit is missing'
+    assert re.fullmatch(r'[0-9a-f]{40}', gate_commit), 'HOSTKEY/source gate commit missing'
 
-    for name in ['README.md', 'RELEASE_NOTES.md']:
-        assert review['files'][name] == digest(root / name), f'{name} changed since page review'
+    for name in ['README.md', 'RELEASE_NOTES.md', 'tools/check-release-page.py']:
+        assert review['files'][name] == digest(root / name), f'{name} changed since release-page review'
 
-    assert 'img.shields.io/github/v/release/kroxaboom-sudo/skazka-hub-releases' in readme
+    assert legacy == android9, 'Legacy compatibility feeds diverged'
+    assert (legacy['packageName'], legacy['versionName'], legacy['versionCode']) == (
+        'me.zaza.reader', '0.6.23-preview', 29)
+    assert legacy['minSdk'] == 33
+    assert legacy['sha256'] == '23e091bdd6f5c35567dd5c962d15172e5188cb101e6e456cb22298c4bf1bafec'
+    assert '/releases/download/v0.6.23-preview/SkazkaHub-0.6.23-preview.apk' in legacy['apkUrl']
+    legacy_apk = root / 'SkazkaHub-0.6.23-preview.apk'
+    assert legacy_apk.is_file()
+    assert legacy_apk.stat().st_size == legacy['size']
+    assert digest(legacy_apk) == legacy['sha256']
+
+    assert (canonical['packageName'], canonical['versionName'], canonical['versionCode']) == (
+        'com.kroxaboom.skazkahub', '0.7.1-preview', 30)
+    assert canonical['minSdk'] == 33
+    canonical_apk = root / 'SkazkaHub-0.7.1-preview.apk'
+    assert canonical_apk.is_file()
+    assert canonical_apk.stat().st_size == canonical['size']
+    assert digest(canonical_apk) == canonical['sha256']
+    assert '/releases/download/v0.7.1-preview/SkazkaHub-0.7.1-preview.apk' in canonical['apkUrl']
+
+    expected_migration = {k: v for k, v in canonical.items() if k != 'notes'}
+    assert migration == expected_migration, 'Migration feed differs from canonical feed'
+
+    assert notes.startswith('# Skazka Hub 0.7.1-preview\n')
+    assert '## RU' in notes and '## EN' in notes
+    assert 'com.kroxaboom.skazkahub' in readme and 'me.zaza.reader' in readme
+    assert 'update-canonical.json' in readme and 'package-migration.json' in readme
     assert 'https://github.com/kroxaboom-sudo/skazka-hub-releases/releases/latest' in readme
-    local_links(root, readme)
+    check_links(root, readme)
 
-    mode = review.get('mode', 'standard')
-    if mode == 'package-migration':
-        check_transition(root, review, readme, notes)
-    else:
-        raise AssertionError(f'Unsupported release page mode: {mode}')
-
-    print('PASS release page: transition metadata, APK hashes, RU/EN notes and links')
+    print('PASS release page: canonical 0.7.1, immutable legacy bridge, RU/EN, APK hashes and links')
 
 
 if __name__ == '__main__':
