@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail publication when release documentation or screenshot evidence is stale."""
+"""Validate the public Skazka Hub release page and transition metadata."""
 import hashlib
 import json
 import re
@@ -7,27 +7,14 @@ from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 
-def check(root: Path) -> None:
-    manifest = json.loads((root / 'update.json').read_text())
-    review = json.loads((root / 'release-page.json').read_text())
-    version = manifest['versionName']
-    readme = (root / 'README.md').read_text()
-    notes = (root / 'RELEASE_NOTES.md').read_text()
+def digest(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
-    assert review['version'] == version, 'Review release-page.json for this release'
-    gate_commit = review.get('device_gate_commit', '')
-    assert re.fullmatch(r'[0-9a-f]{40}', gate_commit), 'HOSTKEY device-gate commit is missing'
-    for name in ['README.md', 'RELEASE_NOTES.md']:
-        digest = hashlib.sha256((root / name).read_bytes()).hexdigest()
-        assert review['files'][name] == digest, f'{name} changed since page review'
 
-    assert notes.startswith('# Skazka Hub ' + version + '\n'), 'Stale release notes'
-    assert manifest['notes'].strip() in notes, 'Updater and release notes disagree'
-    assert 'img.shields.io/github/v/release/kroxaboom-sudo/skazka-hub-releases' in readme
-    assert 'https://github.com/kroxaboom-sudo/skazka-hub-releases/releases/latest' in readme
+def local_links(root: Path, readme: str) -> set[str]:
     refs = re.findall(r'(?:src|href)="([^"]+)"', readme)
     refs += re.findall(r'\]\(([^)]+)\)', readme)
-    local_images = set()
+    images = set()
     for ref in refs:
         url = urlsplit(ref)
         if url.scheme or ref.startswith('#'):
@@ -37,25 +24,65 @@ def check(root: Path) -> None:
         assert target.is_relative_to(root.resolve()), 'Link escapes repository'
         assert target.is_file(), f'Broken local link: {path}'
         if path.endswith('.png'):
-            local_images.add(path)
+            images.add(path)
+    return images
 
-    screenshots = review['screenshots']
-    assert len(screenshots) >= 2, 'At least two verified screenshots required'
-    assert {item['path'] for item in screenshots} == local_images
-    for item in screenshots:
-        assert item['version'] == version, 'Capture screenshots for the release version'
-        evidence = item.get('capture_evidence') or item.get('capture_run') or ''
-        assert evidence, 'Capture evidence missing'
-        if item.get('capture_run'):
-            assert item['capture_run'].startswith('https://github.com/'), 'Invalid GitHub capture evidence'
-        else:
-            assert 'HOSTKEY' in evidence and 'Android 13' in evidence, 'HOSTKEY capture evidence is incomplete'
-        data = (root / item['path']).read_bytes()
-        assert data.startswith(b'\x89PNG\r\n\x1a\n'), 'Invalid PNG'
-        assert hashlib.sha256(data).hexdigest() == item['sha256'], 'Screenshot changed'
 
-    assert f'**{version}**' in readme, 'Screenshot version caption is stale'
-    print('PASS release page: version, HOSTKEY evidence, notes, links and screenshots')
+def check_transition(root: Path, review: dict, readme: str, notes: str) -> None:
+    legacy = json.loads((root / 'update.json').read_text())
+    android9 = json.loads((root / 'update-android9.json').read_text())
+    canonical = json.loads((root / 'update-canonical.json').read_text())
+    migration = json.loads((root / 'package-migration.json').read_text())
+
+    assert review['version'] == legacy['versionName'] == '0.6.23-preview'
+    assert review['canonical_version'] == canonical['versionName'] == '0.7.0-preview'
+    assert legacy['packageName'] == 'me.zaza.reader'
+    assert canonical['packageName'] == 'com.kroxaboom.skazkahub'
+    assert migration['packageName'] == canonical['packageName']
+    assert migration['versionCode'] == canonical['versionCode']
+    assert migration['versionName'] == canonical['versionName']
+    assert migration['sha256'] == canonical['sha256']
+    assert migration['size'] == canonical['size']
+    assert migration['apkUrl'] == canonical['apkUrl']
+    assert android9 == legacy, 'Legacy compatibility feed drifted from update.json'
+
+    for manifest in (legacy, canonical):
+        apk = root / Path(manifest['apkUrl']).name
+        assert apk.is_file(), f'Missing APK: {apk.name}'
+        assert apk.stat().st_size == manifest['size'], f'{apk.name}: size mismatch'
+        assert digest(apk) == manifest['sha256'], f'{apk.name}: SHA-256 mismatch'
+        assert manifest['minSdk'] == 33
+
+    assert '0.6.23-preview → 0.7.0-preview' in readme
+    assert 'me.zaza.reader' in readme and 'com.kroxaboom.skazkahub' in readme
+    assert 'update-canonical.json' in readme and 'package-migration.json' in readme
+    assert '0.6.23-preview' in notes and '0.7.0-preview' in notes
+    assert 'RU' in notes and 'EN' in notes
+    assert not local_links(root, readme), 'Transition page should not claim stale release screenshots'
+
+
+def check(root: Path) -> None:
+    review = json.loads((root / 'release-page.json').read_text())
+    readme = (root / 'README.md').read_text()
+    notes = (root / 'RELEASE_NOTES.md').read_text()
+
+    gate_commit = review.get('device_gate_commit', '')
+    assert re.fullmatch(r'[0-9a-f]{40}', gate_commit), 'HOSTKEY device-gate commit is missing'
+
+    for name in ['README.md', 'RELEASE_NOTES.md']:
+        assert review['files'][name] == digest(root / name), f'{name} changed since page review'
+
+    assert 'img.shields.io/github/v/release/kroxaboom-sudo/skazka-hub-releases' in readme
+    assert 'https://github.com/kroxaboom-sudo/skazka-hub-releases/releases/latest' in readme
+    local_links(root, readme)
+
+    mode = review.get('mode', 'standard')
+    if mode == 'package-migration':
+        check_transition(root, review, readme, notes)
+    else:
+        raise AssertionError(f'Unsupported release page mode: {mode}')
+
+    print('PASS release page: transition metadata, APK hashes, RU/EN notes and links')
 
 
 if __name__ == '__main__':

@@ -14,92 +14,66 @@
 
 ## RU
 
-**Skazka Hub 0.6.22-preview** — Android 13+ reader с local-first/offline-first библиотекой. Текущий публично поддерживаемый источник: **a.zazaza.me**.
+### Текущий переходный релиз
 
-### Проверенные экраны 0.6.22
+**Skazka Hub 0.6.23-preview → 0.7.0-preview** переводит Android-приложение с legacy package `me.zaza.reader` на canonical package `com.kroxaboom.skazkahub` без автоматического удаления старой установки.
 
-Скриншоты получены HOSTKEY Android 13 device-gate на release-кандидате **0.6.22-preview**.
+Для существующей установки:
 
-<table>
-  <tr><th>Загрузки</th><th>Синхронизация</th></tr>
-  <tr>
-    <td><a href="assets/screenshots/0.6.22/downloads.png"><img src="assets/screenshots/0.6.22/downloads.png" alt="Skazka Hub 0.6.22 — Downloads" width="300"></a></td>
-    <td><a href="assets/screenshots/0.6.22/sync-totals.png"><img src="assets/screenshots/0.6.22/sync-totals.png" alt="Skazka Hub 0.6.22 — Sync totals" width="300"></a></td>
-  </tr>
-  <tr><th>Резервная копия</th><th>Offline recovery</th></tr>
-  <tr>
-    <td><a href="assets/screenshots/0.6.22/backup.png"><img src="assets/screenshots/0.6.22/backup.png" alt="Skazka Hub 0.6.22 — Backup" width="300"></a></td>
-    <td><a href="assets/screenshots/0.6.22/recovery.png"><img src="assets/screenshots/0.6.22/recovery.png" alt="Skazka Hub 0.6.22 — Offline recovery" width="300"></a></td>
-  </tr>
-</table>
+1. Установите **0.6.23-preview** поверх **0.6.22-preview**.
+2. В переходной версии откройте раздел миграции и установите проверенный **0.7.0-preview**.
+3. При первом запуске 0.7.0 переносит библиотеку, прогресс, историю, настройки, IMAGE/TEXT/MIXED-контент, обложки и защищённые сессии.
+4. Не удаляйте 0.6.23 до проверки данных в 0.7.0.
 
-### Главное в 0.6.22
+Для новой установки можно сразу использовать **0.7.0-preview** и выбрать чистый запуск.
 
-- единая персистентная очередь Downloads для IMAGE + TEXT и общий state machine автозагрузок;
-- SQLite LocalState как локальный source of truth и Library v2 с unread/new, коллекциями, фильтрами, list/grid, bulk actions и undo;
-- native IMAGE, TEXT и MIXED reading flows, сохранение прогресса и продолжение следующей главы;
-- зашифрованные резервные копии, полный архив скачанного контента и clean-install offline recovery;
-- проверенные RU/EN интерфейсы и LOC-05 для модерируемых удалённых исправлений переводов;
-- усиленная telemetry queue: race-safe flush и coalescing только повторяющейся low-priority usage-телеметрии;
-- Vercel исключён из активных маршрутов и сохранён только как выключенный cold reserve;
-- приватный source-repo уже переименован в `kroxaboom-sudo/skazka-hub`.
+### Почему в Latest две APK
 
-### Установка и обновление
+Переходный release намеренно содержит обе версии:
 
-Скачайте APK из **Releases → Latest** и устанавливайте новую версию поверх существующей. Удалять приложение перед обновлением не нужно.
+- `SkazkaHub-0.6.23-preview.apk` — legacy package `me.zaza.reader`, `versionCode 29`;
+- `SkazkaHub-0.7.0-preview.apk` — canonical package `com.kroxaboom.skazkahub`, `versionCode 29`.
 
-`applicationId me.zaza.reader` пока сохраняется специально: это позволяет 0.6.22 установить поверх 0.6.21 без потери библиотеки, прогресса, истории и настроек. Полная package migration выполняется отдельно только после проверенного переноса данных.
+`update.json` обслуживает старые установки, `update-canonical.json` — новый package, а `package-migration.json` используется переходной версией для безопасной установки canonical APK.
 
-Минимальная версия: **Android 13 / API 33**.
-### Offline-first и обновления
+Обе APK подписаны одним доверенным сертификатом проекта. Минимальная версия Android — **13 / API 33**.
 
-Библиотека, SQLite LocalState, история, прогресс, сохранённые описания/обложки и уже скачанный контент остаются доступны без постоянного соединения с сервером. Remote Runtime Pack принимается только при корректной подписи; при недоступности подписанного обновления приложение использует встроенную/последнюю доверенную конфигурацию вместо ослабления проверки.
+### Проверка
 
-Встроенный updater 0.6.22 сначала проверяет будущий `skazka-hub-releases`, затем безопасно откатывается на `zaza-reader-releases`. Canonical release-repo: skazka-hub-releases. Legacy zaza-reader-releases сохранён как совместимый bootstrap/fallback для старых установок.
-
-### Проверка релиза
-
-HOSTKEY release process проверяет unit-тесты, Android 13 device-gate, install-over, SHA-256 APK, package/version/minSdk и сертификат подписи. Опубликованный APK одной версии считается неизменяемым артефактом.
+HOSTKEY SERVER-FIRST gate проверяет reproducible build, подпись, package/version/minSdk, rollback/retry, перенос локальных данных, canonical updater, RU/EN, Downloads и offline recovery. Старое приложение не удаляется автоматически.
 
 ---
 
 ## EN
 
-**Skazka Hub 0.6.22-preview** is an Android 13+ reader built around a local-first/offline-first library. The currently supported public source is **a.zazaza.me**.
+### Current transition release
 
-### Verified 0.6.22 screens
+**Skazka Hub 0.6.23-preview → 0.7.0-preview** moves the Android app from legacy package `me.zaza.reader` to canonical package `com.kroxaboom.skazkahub` without automatically removing the old installation.
 
-The four screenshots above were captured by the HOSTKEY Android 13 device gate from the **0.6.22-preview** release candidate.
+For an existing installation:
 
-### Highlights in 0.6.22
+1. Install **0.6.23-preview** over **0.6.22-preview**.
+2. Open the migration section in the transition build and install the verified **0.7.0-preview**.
+3. On first launch, 0.7.0 migrates library data, progress, history, settings, IMAGE/TEXT/MIXED content, artwork, and protected sessions.
+4. Keep 0.6.23 until the migrated data has been checked in 0.7.0.
 
-- one persistent Downloads queue for IMAGE + TEXT plus a shared automatic-download state machine;
-- SQLite LocalState as the local source of truth and Library v2 with unread/new, collections, advanced filters, list/grid, bulk actions and undo;
-- native IMAGE, TEXT and MIXED reading flows with persisted progress and next-chapter continuation;
-- encrypted backups, full downloaded-content archives and clean-install offline recovery;
-- verified RU/EN UI coverage plus LOC-05 for moderated remote translation corrections;
-- a race-safe telemetry queue with coalescing limited to repetitive low-priority usage events;
-- Vercel removed from active routes and retained only as a disabled cold reserve;
-- the private source repository migrated to `kroxaboom-sudo/skazka-hub`.
+New users can install **0.7.0-preview** directly and choose a fresh installation.
 
-### Install and update
+### Why Latest contains two APKs
 
-Download the APK from **Releases → Latest** and install it over the existing app. Do not uninstall first.
+The transition release intentionally contains both builds:
 
-The legacy `applicationId me.zaza.reader` is intentionally preserved for now so 0.6.22 can install over 0.6.21 without losing library data, reading progress, history or settings. A full package migration is a separate data-migration step.
+- `SkazkaHub-0.6.23-preview.apk` — legacy package `me.zaza.reader`, `versionCode 29`;
+- `SkazkaHub-0.7.0-preview.apk` — canonical package `com.kroxaboom.skazkahub`, `versionCode 29`.
 
-Minimum version: **Android 13 / API 33**.
+`update.json` serves legacy installations, `update-canonical.json` serves the canonical package, and `package-migration.json` is used by the transition build to install the verified canonical APK.
 
-### Offline-first and update safety
+Both APKs use the same trusted project certificate. Minimum Android version: **13 / API 33**.
 
-Library data, SQLite LocalState, history, progress, saved metadata/artwork and downloaded content remain available without continuous server access. Remote Runtime Packs are accepted only with a valid signature; if a signed update is unavailable, the app keeps its embedded/last trusted configuration rather than weakening verification.
+### Verification
 
-The 0.6.22 updater tries the future `skazka-hub-releases` feed first and safely falls back to `zaza-reader-releases`. The canonical release repository is skazka-hub-releases; legacy zaza-reader-releases remains available as a compatible bootstrap/fallback for older installations.
-
-### Release verification
-
-The HOSTKEY release process verifies unit tests, Android 13 device gates, install-over behavior, APK SHA-256, package/version/minSdk and the signing certificate. A published APK for a version is treated as immutable.
+The HOSTKEY SERVER-FIRST gate covers reproducible builds, signing, package/version/minSdk, rollback/retry, local data migration, the canonical updater, RU/EN, Downloads, and offline recovery. The old app is never removed automatically.
 
 ---
 
-This public repository contains APK files, update metadata, release notes and verified screenshots. Android source is maintained separately in the private `kroxaboom-sudo/skazka-hub` repository. Signing keys are never published.
+This public repository contains APK files, update metadata and RU/EN release documentation. Android source is maintained separately in the private `kroxaboom-sudo/skazka-hub` repository. Signing keys are never published.

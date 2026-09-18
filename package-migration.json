@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "packageName": "com.kroxaboom.skazkahub",
+  "versionCode": 29,
+  "versionName": "0.7.0-preview",
+  "minSdk": 33,
+  "size": 373727,
+  "sha256": "b93f89892162f2406ebaab5ec1ef15605e13226ee50a4a242cf8a8dc63f040e4",
+  "apkUrl": "https://github.com/kroxaboom-sudo/skazka-hub-releases/releases/download/v0.6.23-preview/SkazkaHub-0.7.0-preview.apk"
+}
