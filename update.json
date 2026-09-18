@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "packageName": "me.zaza.reader",
+  "versionCode": 28,
+  "versionName": "0.6.22-preview",
+  "minSdk": 33,
+  "size": 353247,
+  "sha256": "1e641f9fea13e1fadb2f6b4b1cd48f4a01ecb7259208dc6c25e1986e9e41c2ee",
+  "apkUrl": "https://github.com/kroxaboom-sudo/skazka-hub-releases/releases/download/v0.6.22-preview/SkazkaHub-0.6.22-preview.apk",
+  "notes": "RU: крупное обновление local/offline-first библиотеки, загрузок IMAGE/TEXT/MIXED, читалки, резервного копирования и RU/EN. EN: major local/offline-first update for the library, IMAGE/TEXT/MIXED downloads, reader, backups, and RU/EN support."
+}

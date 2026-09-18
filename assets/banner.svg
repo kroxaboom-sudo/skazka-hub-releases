@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="280" viewBox="0 0 960 280" role="img" aria-labelledby="title desc">
+<title id="title">Skazka Hub</title>
+<desc id="desc">Ваша библиотека. Всегда под рукой. Приложение для Android.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#151b29"/><stop offset="1" stop-color="#243a46"/></linearGradient></defs>
+<rect width="960" height="280" rx="24" fill="url(#bg)"/>
+<circle cx="918" cy="36" r="180" fill="#75c8bf" opacity=".04"/>
+<circle cx="918" cy="36" r="130" fill="none" stroke="#75c8bf" opacity=".12"/>
+<g transform="translate(44 50) scale(1.67)">
+<circle cx="54" cy="54" r="51" fill="#26384a"/>
+<path fill="#b5ef86" d="M24 29Q42 25 54 35Q66 25 84 29L84 77Q66 73 54 83Q42 73 24 77Z"/>
+<path fill="#75c8bf" d="M54 35Q66 25 84 29L84 77Q66 73 54 83Z"/>
+<path fill="none" stroke="#151b29" stroke-width="3" stroke-linecap="round" d="M54 36V76M32 41L44 44M32 51L44 54M32 61L44 64"/>
+<path fill="#151b29" d="M63 40H77V44L68 62H78V67H62V63L72 45H63Z"/>
+</g>
+<g font-family="DejaVu Sans,Arial,sans-serif">
+<text x="265" y="115" fill="#edf5ff" font-size="59" font-weight="700">Skazka Hub</text>
+<text x="268" y="161" fill="#c1d1df" font-size="25">Ваша библиотека. Всегда под рукой.</text>
+<rect x="268" y="191" width="141" height="33" rx="16" fill="#b5ef86"/>
+<text x="338" y="213" text-anchor="middle" fill="#151b29" font-size="16" font-weight="700">Android 13+</text>
+<text x="430" y="213" fill="#a4bbc8" font-size="16">Чтение · Загрузки · Синхронизация</text>
+</g>
+</svg>
