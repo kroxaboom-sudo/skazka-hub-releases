@@ -67,6 +67,9 @@ def check(root: Path) -> None:
 
     assert notes.startswith('# Skazka Hub 0.7.1-preview\n')
     assert '## RU' in notes and '## EN' in notes
+    for retired_brand in ['Grouple', 'Zaza Reader', 'ZazaReader']:
+        assert retired_brand not in notes, f'Retired public brand in release notes: {retired_brand}'
+        assert retired_brand not in readme, f'Retired public brand in release README: {retired_brand}'
     assert 'com.kroxaboom.skazkahub' in readme and 'me.zaza.reader' in readme
     assert 'update-canonical.json' in readme and 'package-migration.json' in readme
     assert 'https://github.com/kroxaboom-sudo/skazka-hub-releases/releases/latest' in readme
