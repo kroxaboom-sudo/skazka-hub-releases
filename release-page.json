@@ -5,7 +5,7 @@
   "device_gate_commit": "f4e0c6ddac298632fde2124773d2c8a71ebde338",
   "files": {
     "README.md": "ef4401fe3eb63f21d33a1250dd0ef557378931d2c1def1d92a607e43435f5ad4",
-    "RELEASE_NOTES.md": "227615106202df91a9e32ff218a4ea2a2c274fbd9faf17c38575fb2e441de92e",
-    "tools/check-release-page.py": "f0ea3c7d859a92be5e0905df093486813f75f7cc26a0e7ba4b52bf3c35db28d2"
+    "RELEASE_NOTES.md": "3adb56ecb4dbf2db36a89cbb496613d48ff7e5b7319fb89ab2926bb6f6b8a2db",
+    "tools/check-release-page.py": "583a5bcbf1565a33a985e27c8f25a6cb48a3a215ae210db628c1812f8c175aa5"
   }
 }

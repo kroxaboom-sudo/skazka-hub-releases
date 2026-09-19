@@ -18,7 +18,7 @@
 
 ### Настройки
 - Настройки сгруппированы в четыре понятных блока: **Чтение**, **Офлайн и файлы**, **Аккаунт и данные**, **Приложение**.
-- `Аккаунт Grouple` и `Синхронизация` объединены в один раздел **Аккаунт и синхронизация**.
+- `Аккаунт Skazka` и `Синхронизация` объединены в один раздел **Аккаунт и синхронизация**.
 - `Источники` переименованы в **Источники и зеркала**, `Сервис` — в **Поддержка и диагностика**.
 - Экран package migration больше не занимает постоянное место в настройках после успешного переноса.
 
@@ -47,7 +47,7 @@
 
 ### Settings
 - Settings are grouped into **Reading**, **Offline and files**, **Account and data**, and **App**.
-- Grouple account and synchronization are combined into **Account and sync**.
+- Skazka account and synchronization are combined into **Account and sync**.
 - Sources are now **Sources and mirrors**; Service is now **Support and diagnostics**.
 - Package migration no longer occupies a permanent settings row after migration completes.
 
